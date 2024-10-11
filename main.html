@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间显示与验证码</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding-top: 50px;
+        }
+
+        h1, p {
+            color: #333;
+        }
+    </style>
+    <script>
+        function updateTime() {
+            var now = new Date();
+            var timeString = now.toLocaleTimeString();
+            document.getElementById('time').innerHTML = timeString;
+        }
+
+        function hashDate(dateString) {
+            var hash = 0, i, chr;
+            if (dateString.length === 0) return hash;
+            for (i = 0; i < dateString.length; i++) {
+                chr   = dateString.charCodeAt(i);
+                hash  = ((hash << 5) - hash) + chr;
+                hash |= 0; // Convert to 32bit integer
+            }
+            return Math.abs(hash).toString().slice(-4);
+        }
+
+        function updateCode() {
+            var date = new Date();
+            var dateString = date.toISOString().substring(0, 10); // YYYY-MM-DD
+            var code = hashDate(dateString);
+            document.getElementById('code').innerHTML = code;
+        }
+
+        function initialize() {
+            updateTime();
+            updateCode();
+            setInterval(updateTime, 1000); // 每秒更新时间
+            setInterval(updateCode, 60000); // 每分钟检查是否需要更新验证码
+        }
+
+        window.onload = initialize;
+    </script>
+</head>
+<body>
+    <h1>当前时间: <span id="time"></span></h1>
+    <p>今日验证码: <span id="code"></span></p>
+</body>
+</html>
