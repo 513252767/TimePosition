@@ -73,7 +73,7 @@
             var hour = date.getHours();
             var period = getVerificationPeriod(hour);
             var code = hashDateAndHour(dateString, hour);
-            document.getElementById('code').innerHTML = "(" + period + "): " + code;
+            document.getElementById('code').innerHTML = "(" + period + "):\n " + code;
         }
 
         function getLocation() {
@@ -82,7 +82,7 @@
                     function(position) {
                         var latitude = position.coords.latitude.toFixed(6);
                         var longitude = position.coords.longitude.toFixed(6);
-                        document.getElementById('location').innerHTML = "纬度: " + latitude + ", 经度: " + longitude;
+                        document.getElementById('location').innerHTML = "纬度: " + latitude + "\n经度: " + longitude;
                     },
                     function(error) {
                         switch(error.code) {
