@@ -16,8 +16,17 @@
             color: #333;
         }
 
+        .datetime {
+            font-size: 1em; /* 日期和时间的字体大小 */
+        }
+
+        .time {
+            margin-top: 10px;
+            font-size: 1em; /* 时间字体大小与日期一致 */
+        }
+
         .large-code {
-            font-size: 4em; /* 增大字体 */
+            font-size: 8em; /* 验证码字体大小增大两倍 */
         }
 
         .location {
@@ -42,8 +51,9 @@
     <script>
         function updateTime() {
             var now = new Date();
-            var timeString = now.toLocaleTimeString();
-            document.getElementById('time').innerHTML = timeString;
+            var dateString = now.toISOString().substring(0, 10); // YYYY-MM-DD
+            var timeString = now.toLocaleTimeString(); // HH:mm:ss
+            document.getElementById('date').innerHTML = "时间: " + dateString+" "+timeString;
         }
 
         function hashDateAndHour(dateString, hour) {
@@ -141,7 +151,10 @@
     </script>
 </head>
 <body>
-    <h1>当前时间: <span id="time"></span></h1>
+    <h1>
+        <p id="date" class="datetime"></p>
+        <p id="time" class="time"></p>
+    </h1>
     <p id="period">验证码有效时段:</p>
     <p><span class="large-code" id="code"></span></p>
     <div class="location">
