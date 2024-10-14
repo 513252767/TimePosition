@@ -14,11 +14,14 @@
 
         h1, p {
             color: #333;
-            font-size: 2em; /* 缩小字体大小 */
         }
 
-        span {
-            display: inline-block;
+        .large-code {
+            font-size: 4em; /* 增大字体 */
+        }
+
+        .location {
+            margin-top: 20px;
         }
 
         /* 手机端横屏显示的样式 */
@@ -73,7 +76,8 @@
             var hour = date.getHours();
             var period = getVerificationPeriod(hour);
             var code = hashDateAndHour(dateString, hour);
-            document.getElementById('code').innerHTML = "(" + period + "):\n " + code;
+            document.getElementById('period').innerHTML = "验证码有效时段: " + period;
+            document.getElementById('code').innerHTML = code;
         }
 
         function getLocation() {
@@ -82,28 +86,29 @@
                     function(position) {
                         var latitude = position.coords.latitude.toFixed(6);
                         var longitude = position.coords.longitude.toFixed(6);
-                        document.getElementById('location').innerHTML = "纬度: " + latitude + "\n经度: " + longitude;
+                        document.getElementById('latitude').innerHTML = "纬度: " + latitude;
+                        document.getElementById('longitude').innerHTML = "经度: " + longitude;
                     },
                     function(error) {
                         switch(error.code) {
                             case error.PERMISSION_DENIED:
-                                document.getElementById('location').innerHTML = "您拒绝了位置请求权限。";
+                                document.getElementById('location-error').innerHTML = "您拒绝了位置请求权限。";
                                 break;
                             case error.POSITION_UNAVAILABLE:
-                                document.getElementById('location').innerHTML = "位置信息不可用。";
+                                document.getElementById('location-error').innerHTML = "位置信息不可用。";
                                 break;
                             case error.TIMEOUT:
-                                document.getElementById('location').innerHTML = "请求用户地理位置超时。";
+                                document.getElementById('location-error').innerHTML = "请求用户地理位置超时。";
                                 break;
                             case error.UNKNOWN_ERROR:
-                                document.getElementById('location').innerHTML = "未知错误。";
+                                document.getElementById('location-error').innerHTML = "未知错误。";
                                 break;
                         }
                     },
                     { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
                 );
             } else {
-                document.getElementById('location').innerHTML = "您的浏览器不支持地理定位功能。";
+                document.getElementById('location-error').innerHTML = "您的浏览器不支持地理定位功能。";
             }
         }
 
@@ -137,7 +142,12 @@
 </head>
 <body>
     <h1>当前时间: <span id="time"></span></h1>
-    <p>验证码: <span id="code"></span></p>
-    <p>当前位置: <span id="location"></span></p>
+    <p id="period">验证码有效时段:</p>
+    <p><span class="large-code" id="code"></span></p>
+    <div class="location">
+        <p id="latitude"></p>
+        <p id="longitude"></p>
+        <p id="location-error"></p>
+    </div>
 </body>
 </html>
