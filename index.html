@@ -14,6 +14,11 @@
 
         h1, p {
             color: #333;
+            font-size: 2em; /* 缩小字体大小 */
+        }
+
+        span {
+            display: inline-block;
         }
     </style>
     <script>
@@ -23,27 +28,74 @@
             document.getElementById('time').innerHTML = timeString;
         }
 
-        function hashDate(dateString) {
+        function hashDateAndHour(dateString, hour) {
             var hash = 0, i, chr;
-            if (dateString.length === 0) return hash;
-            for (i = 0; i < dateString.length; i++) {
-                chr   = dateString.charCodeAt(i);
-                hash  = ((hash << 5) - hash) + chr;
-                hash |= 0; // Convert to 32bit integer
+            var fixedString = "randomSeed"; // 固定字符串增强随机性
+            
+            // 将日期字符串与小时数拼接在一起
+            var combinedString = dateString + hour.toString().padStart(2, '0') + fixedString;
+            
+            if (combinedString.length === 0) return hash;
+            
+            for (i = 0; i < combinedString.length; i++) {
+                chr = combinedString.charCodeAt(i);
+                hash = ((hash << 5) - hash + chr) ^ (chr >>> 16);
             }
-            return Math.abs(hash).toString().slice(-4);
+            
+            // 取绝对值并保留四位数
+            return Math.abs(hash).toString().padStart(4, '0').slice(-4);
+        }
+
+        function getVerificationPeriod(hour) {
+            var startHour = Math.floor(hour / 2) * 2;
+            var endHour = startHour + 2;
+            return startHour.toString().padStart(2, '0') + ':00 - ' + endHour.toString().padStart(2, '0') + ':00';
         }
 
         function updateCode() {
             var date = new Date();
             var dateString = date.toISOString().substring(0, 10); // YYYY-MM-DD
-            var code = hashDate(dateString);
-            document.getElementById('code').innerHTML = code;
+            var hour = date.getHours();
+            var period = getVerificationPeriod(hour);
+            var code = hashDateAndHour(dateString, hour);
+            document.getElementById('code').innerHTML = "(" + period + "): " + code;
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        var latitude = position.coords.latitude.toFixed(6);
+                        var longitude = position.coords.longitude.toFixed(6);
+                        document.getElementById('location').innerHTML = "纬度: " + latitude + ", 经度: " + longitude;
+                    },
+                    function(error) {
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                document.getElementById('location').innerHTML = "您拒绝了位置请求权限。";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                document.getElementById('location').innerHTML = "位置信息不可用。";
+                                break;
+                            case error.TIMEOUT:
+                                document.getElementById('location').innerHTML = "请求用户地理位置超时。";
+                                break;
+                            case error.UNKNOWN_ERROR:
+                                document.getElementById('location').innerHTML = "未知错误。";
+                                break;
+                        }
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            } else {
+                document.getElementById('location').innerHTML = "您的浏览器不支持地理定位功能。";
+            }
         }
 
         function initialize() {
             updateTime();
             updateCode();
+            getLocation(); // 获取地理位置信息
             setInterval(updateTime, 1000); // 每秒更新时间
             setInterval(updateCode, 60000); // 每分钟检查是否需要更新验证码
         }
@@ -53,6 +105,7 @@
 </head>
 <body>
     <h1>当前时间: <span id="time"></span></h1>
-    <p>今日验证码: <span id="code"></span></p>
+    <p>验证码 <span id="code"></span></p>
+    <p>当前位置: <span id="location"></span></p>
 </body>
 </html>
