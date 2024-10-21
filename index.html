@@ -53,7 +53,7 @@
             var now = new Date();
             var dateString = now.toISOString().substring(0, 10);
             var timeString = now.toLocaleTimeString();
-            document.getElementById('date').innerHTML = "时间: " + dateString + " " + timeString;
+            document.getElementById('time').innerHTML = "时间: " + dateString + " " + timeString;
         }
 
         function hashDateAndHour(dateString, hour) {
@@ -96,7 +96,7 @@
             var code = hashDateAndHour(dateString, standardizedHour);
             generateGradientCaptcha(code);
             document.getElementById('period').innerHTML = "随机码有效时段: " + period;
-            document.getElementById('code').innerHTML = code;
+            // document.getElementById('code').innerHTML = code;
         }
 
         function checkOrientation() {
@@ -144,9 +144,6 @@
             captchaImage.src = canvas.toDataURL();
         }
 
-
-
-
         function initialize() {
             updateTime();
             updateCode();
@@ -167,8 +164,8 @@
 </head>
 <body>
     <h1>
-        <p id="date" class="datetime"></p>
-        <p id="time" class="time"></p>
+        <!-- <p id="date" class="datetime"></p> -->
+        <p id="time" class="datetime"></p>
     </h1>
     <p id="period">随机码有效时段:</p>
     <!-- <p><span class="large-code" id="code"></span></p> -->
