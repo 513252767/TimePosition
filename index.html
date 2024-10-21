@@ -68,7 +68,7 @@
             if (hour >= 19 || hour < 7) {
                 return "19:00 - 07:00";
             } else {
-                var startHour = Math.floor(hour / 2) * 2+1;
+                var startHour = Math.floor(hour / 2) * 2;
                 var endHour = startHour + 2;
                 return startHour.toString().padStart(2, '0') + ':00 - ' + endHour.toString().padStart(2, '0') + ':00';
             }
@@ -78,8 +78,17 @@
             var date = new Date();
             var dateString = date.toISOString().substring(0, 10);
             var hour = date.getHours();
-            var period = getVerificationPeriod(hour);
-            var code = hashDateAndHour(dateString, hour);
+            
+            var standardizedHour = Math.floor((hour-1) / 2) * 2+1; // 通过向下取整，保证小时固定为每两小时一个区间
+            var period = getVerificationPeriod(standardizedHour);
+            if (standardizedHour >= 19 || standardizedHour < 7) {
+                standardizedHour=19;
+                if(standardizedHour>=0){
+                    date.setDate(date.getDate()-1);
+                    dateString = date.toISOString().substring(0, 10);
+                }
+            }
+            var code = hashDateAndHour(dateString, standardizedHour);
             document.getElementById('period').innerHTML = "随机码有效时段: " + period;
             document.getElementById('code').innerHTML = code;
         }
