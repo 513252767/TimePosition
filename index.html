@@ -68,7 +68,7 @@
             if (hour >= 19 || hour < 7) {
                 return "19:00 - 07:00";
             } else {
-                var startHour = Math.floor(hour / 2) * 2;
+                var startHour = hour;
                 var endHour = startHour + 2;
                 return startHour.toString().padStart(2, '0') + ':00 - ' + endHour.toString().padStart(2, '0') + ':00';
             }
