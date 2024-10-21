@@ -42,6 +42,11 @@
                 margin: 10px;
             }
         }
+
+        /* 隐藏Canvas */
+        #captchaCanvas {
+            display: none; /* 隐藏Canvas元素 */
+        }
     </style>
     <script>
         function updateTime() {
@@ -89,6 +94,7 @@
                 }
             }
             var code = hashDateAndHour(dateString, standardizedHour);
+            generateGradientCaptcha(code);
             document.getElementById('period').innerHTML = "随机码有效时段: " + period;
             document.getElementById('code').innerHTML = code;
         }
@@ -105,6 +111,41 @@
                 document.body.style.height = "";
             }
         }
+
+        function generateGradientCaptcha(code) {
+            // 获取Canvas元素
+            var canvas = document.getElementById('captchaCanvas');
+            var ctx = canvas.getContext('2d');
+            
+            // 清空Canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 设置字体样式
+            ctx.font = 'bold 150px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 创建渐变
+            var gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop('0', 'red');
+            gradient.addColorStop('0.20', 'orange');
+            gradient.addColorStop('0.5', 'purple');
+            gradient.addColorStop('0.70', 'green');
+            gradient.addColorStop('0.95', 'black');
+            
+            // 应用渐变
+            ctx.fillStyle = gradient;
+            
+            // 绘制验证码文字
+            ctx.fillText(code, canvas.width / 2, canvas.height / 2);
+            
+            // 将Canvas内容转换为图片
+            var captchaImage = document.getElementById('captchaImage');
+            captchaImage.src = canvas.toDataURL();
+        }
+
+
+
 
         function initialize() {
             updateTime();
@@ -130,6 +171,10 @@
         <p id="time" class="time"></p>
     </h1>
     <p id="period">随机码有效时段:</p>
-    <p><span class="large-code" id="code"></span></p>
+    <!-- <p><span class="large-code" id="code"></span></p> -->
+    <canvas id="captchaCanvas" width="400" height="200"></canvas>
+    <p>
+        <img id="captchaImage" alt="验证码图片" />
+    </p>
 </body>
 </html>
