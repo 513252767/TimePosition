@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>时间显示与验证码</title>
+    <title>时间显示与随机码</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,24 +17,18 @@
         }
 
         .datetime {
-            font-size: 1em; /* 日期和时间的字体大小 */
+            font-size: 1em;
         }
 
         .time {
             margin-top: 10px;
-            font-size: 1em; /* 时间字体大小与日期一致 */
+            font-size: 1em;
         }
 
         .large-code {
-            font-size: 8em; /* 验证码字体大小增大两倍 */
+            font-size: 8em;
         }
 
-        .location {
-            margin-top: 20px;
-            font-size: 2em;
-        }
-
-        /* 手机端横屏显示的样式 */
         @media screen and (max-width: 768px) and (orientation: landscape) {
             body {
                 transform: rotate(90deg);
@@ -52,86 +46,51 @@
     <script>
         function updateTime() {
             var now = new Date();
-            var dateString = now.toISOString().substring(0, 10); // YYYY-MM-DD
-            var timeString = now.toLocaleTimeString(); // HH:mm:ss
-            document.getElementById('date').innerHTML = "时间: " + dateString+" "+timeString;
+            var dateString = now.toISOString().substring(0, 10);
+            var timeString = now.toLocaleTimeString();
+            document.getElementById('date').innerHTML = "时间: " + dateString + " " + timeString;
         }
 
         function hashDateAndHour(dateString, hour) {
             var hash = 0, i, chr;
-            var fixedString = "randomSeed"; // 固定字符串增强随机性
-            
-            // 将日期字符串与小时数拼接在一起
+            var fixedString = "randomSeed";
             var combinedString = dateString + hour.toString().padStart(2, '0') + fixedString;
-            
-            if (combinedString.length === 0) return hash;
-            
+
             for (i = 0; i < combinedString.length; i++) {
                 chr = combinedString.charCodeAt(i);
                 hash = ((hash << 5) - hash + chr) ^ (chr >>> 16);
             }
-            
-            // 取绝对值并保留四位数
+
             return Math.abs(hash).toString().padStart(4, '0').slice(-4);
         }
 
         function getVerificationPeriod(hour) {
-            var startHour = Math.floor(hour / 2) * 2;
-            var endHour = startHour + 2;
-            return startHour.toString().padStart(2, '0') + ':00 - ' + endHour.toString().padStart(2, '0') + ':00';
+            if (hour >= 19 || hour < 7) {
+                return "19:00 - 07:00";
+            } else {
+                var startHour = Math.floor(hour / 2) * 2+1;
+                var endHour = startHour + 2;
+                return startHour.toString().padStart(2, '0') + ':00 - ' + endHour.toString().padStart(2, '0') + ':00';
+            }
         }
 
         function updateCode() {
             var date = new Date();
-            var dateString = date.toISOString().substring(0, 10); // YYYY-MM-DD
+            var dateString = date.toISOString().substring(0, 10);
             var hour = date.getHours();
             var period = getVerificationPeriod(hour);
             var code = hashDateAndHour(dateString, hour);
-            document.getElementById('period').innerHTML = "验证码有效时段: " + period;
+            document.getElementById('period').innerHTML = "随机码有效时段: " + period;
             document.getElementById('code').innerHTML = code;
-        }
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        var latitude = position.coords.latitude.toFixed(6);
-                        var longitude = position.coords.longitude.toFixed(6);
-                        document.getElementById('latitude').innerHTML = "纬度: " + latitude;
-                        document.getElementById('longitude').innerHTML = "经度: " + longitude;
-                    },
-                    function(error) {
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                document.getElementById('location-error').innerHTML = "您拒绝了位置请求权限。";
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                document.getElementById('location-error').innerHTML = "位置信息不可用。";
-                                break;
-                            case error.TIMEOUT:
-                                document.getElementById('location-error').innerHTML = "请求用户地理位置超时。";
-                                break;
-                            case error.UNKNOWN_ERROR:
-                                document.getElementById('location-error').innerHTML = "未知错误。";
-                                break;
-                        }
-                    },
-                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                );
-            } else {
-                document.getElementById('location-error').innerHTML = "您的浏览器不支持地理定位功能。";
-            }
         }
 
         function checkOrientation() {
             var isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
             if (isMobile && window.orientation === 90 || window.orientation === -90) {
-                // 强制横屏显示
                 document.body.style.transform = "rotate(90deg)";
                 document.body.style.width = "100vh";
                 document.body.style.height = "100vw";
             } else {
-                // 恢复正常显示
                 document.body.style.transform = "";
                 document.body.style.width = "";
                 document.body.style.height = "";
@@ -141,11 +100,16 @@
         function initialize() {
             updateTime();
             updateCode();
-            getLocation();
-            checkOrientation(); // 检查设备方向
-            setInterval(updateTime, 1000); // 每秒更新时间
-            setInterval(updateCode, 60000); // 每分钟检查是否需要更新验证码
-            window.addEventListener('orientationchange', checkOrientation); // 监听方向变化
+            checkOrientation();
+
+            setInterval(updateTime, 1000); 
+
+            var hour = new Date().getHours();
+            if (hour >= 7 && hour < 19) {
+                setInterval(updateCode, 60000 * 60 * 2); // 每两小时更新验证码
+            }
+            
+            window.addEventListener('orientationchange', checkOrientation);
         }
 
         window.onload = initialize;
@@ -156,12 +120,7 @@
         <p id="date" class="datetime"></p>
         <p id="time" class="time"></p>
     </h1>
-    <p id="period">验证码有效时段:</p>
+    <p id="period">随机码有效时段:</p>
     <p><span class="large-code" id="code"></span></p>
-    <div class="location">
-        <p id="latitude"></p>
-        <p id="longitude"></p>
-        <p id="location-error"></p>
-    </div>
 </body>
 </html>
